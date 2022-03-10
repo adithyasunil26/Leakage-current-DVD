@@ -1,0 +1,55 @@
+*cfr3-BandAn -- Independent signal generators and Vdd power supply
+*(AandB)n for all combinations of input.
+
+.INCLUDE ../../45nm_MGK.pm
+.OPTIONS GMIN=1e-020 ABSTOL=1e-018
+
+*Definizione dei parametri 
+.PARAM Lmin=45n
+.PARAM Ldiff=90n
+.PARAM Wmin=45n
+
+Vdd 	vgen 	0 
+Va 	A 	0 	
+Vb 	B 	0 
+
+Mn1 	SD1 	A 	0 	0 	nmos W={2*Wmin} L={Lmin} AS={Ldiff*2*Wmin} AD={Ldiff*2*Wmin} PS={2*(Ldiff+2*Wmin)} PD={2*(Ldiff+2*Wmin)}
+Mn2 	vgen 	B 	SD1 	0 	nmos W={2*Wmin} L={Lmin} AS={Ldiff*2*Wmin} AD={Ldiff*2*Wmin} PS={2*(Ldiff+2*Wmin)} PD={2*(Ldiff+2*Wmin)}
+
+
+.CONTROL
+let Ldiff=90n
+foreach Vddbasic 1.0
+  echo Vdd basic = $Vddbasic
+   alter Vdd = $Vddbasic
+	foreach width 45n 
+
+	echo
+	echo
+	echo Wmin=$width
+
+
+			foreach input 0 $Vddbasic
+		 	alter Va = $input
+ 	        			foreach input 0 $Vddbasic
+					 alter Vb = $input
+			        *if not(@Vdd[DC] & @Va[DC] & @Vb[DC] )
+		
+
+	 	echo DC Analysis at 30C and 90C
+		            			
+		dc TEMP 30 90 60
+		print V(SD1) ((V(A)*(I(Va))+V(B)*(I(Vb))+V(vgen)*(I(Vdd)))) V(vgen) V(A) V(B)
+		set filetype=ascii
+		set wr_singlescale
+		set wr_vecnames
+		set appendwrite
+		wrdata AandBn.txt V(SD1) ((V(A)*(I(Va))+V(B)*(I(Vb))+V(vgen)*(I(Vdd)))) V(vgen) V(A) V(B)
+			   
+			        end
+			    end	
+	    end
+	end	
+   
+.ENDC
+.END

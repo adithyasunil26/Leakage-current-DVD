@@ -1,0 +1,60 @@
+*cfr3-BandAp -- Independent signal generators and Vdd power supply
+*AandBp
+
+.INCLUDE ../../45nm_MGK.pm
+.OPTIONS GMIN=1e-020 ABSTOL=1e-018
+
+.PARAM Lmin=45n
+.PARAM Ldiff=90n
+.PARAM Wmin=45n
+
+Vdd alim 0
+Va A 0
+Vb B 0
+
+Mp1 	SD1 	A 	alim 	alim 	pmos W={4*Wmin} L={Lmin} AS={Ldiff*4*Wmin} AD={Ldiff*4*Wmin} PS={2*(Ldiff+4*Wmin)} PD={2*(Ldiff+4*Wmin)}
+Mp2 	0 	B 	SD1 	alim 	pmos W={4*Wmin} L={Lmin} AS={Ldiff*4*Wmin} AD={Ldiff*4*Wmin} PS={2*(Ldiff+4*Wmin)} PD={2*(Ldiff+4*Wmin)}
+
+.CONTROL
+let Ldiff=90n
+foreach Vddbasic 1.0 
+echo Vdd basic = $Vddbasic
+alter Vdd = $Vddbasic
+foreach width 45n
+echo 
+echo
+	echo WMIN=$width
+	echo
+    
+
+    *foreach input 0 $Vddbasic
+    *alter Vdd= $input
+    **alter Cout ic = $input
+	  	    foreach input 0 $Vddbasic
+ 	  	    alter Va = $input
+ 	        	foreach input 0 $Vddbasic
+		        alter Vb = $input
+			    
+		            *if not(@Vdd[DC] & not(@Va[DC]) & not(@Vb[DC]) )
+			        *    alter Cout ic = $Vddbasic
+		            *else
+			        *    alter Cout ic = 0
+		            *end
+		            **show Cout : ic
+		   echo DC Analysis at 30C and 90C
+		            dc TEMP 30 90 60
+			        print V(SD1) (V(A)*(I(Va))+V(B)*(I(Vb))+V(alim)*(I(Vdd))) V(alim) V(A) V(B)  
+
+							set filetype=ascii
+							set wr_singlescale
+							set wr_vecnames
+							set appendwrite
+							wrdata AandBp.txt V(SD1) (V(A)*(I(Va))+V(B)*(I(Vb))+V(alim)*(I(Vdd))) V(alim) V(A) V(B)
+			        *dc TEMP 30 90 60 Vdd 0.8 1.2 0.1 
+			        *print V(alim) V(A) V(B) V(C) V(SD) V(SD2)  I(Va) I(Vb)  I(Vc) I(Vdd) (abs(I(Va))+abs(I(Vb))+abs(I(Vc))+abs(I(Vdd)))
+			end
+		end
+	end	
+end
+.ENDC
+.END
