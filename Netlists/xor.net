@@ -12,22 +12,22 @@ Vdd vdd gnd 1.2v
 Va ina 0 1.2v
 Vb inb 0 0v
 
-.subckt xor in1 in2 o2 1 0
-	X1 in1 in3 1 0 not
-	X2 in2 in4 1 0 not
-	M1 a in1 0 0 nmos W={Wmin} L={Lmin} 
-	M2 a in4 0 0 nmos W={Wmin} L={Lmin} 
-	M3 o2 in3 a 0 nmos W={Wmin} L={Lmin}
-	M4 o2 in2 a 0 nmos W={Wmin} L={Lmin}	
-	M5 o2 in1 b 1 pmos W={Wmin} L={Lmin}
-	M6 o2 in2 b 1 pmos W={Wmin} L={Lmin}
-	M7 b in2 1 1 pmos W={Wmin} L={Lmin}
-	M8 b in4 1 1 pmos W={Wmin} L={Lmin}
+.subckt xor in1 in2 o2 vdd gnd
+	X1 in1 in3 vdd gnd not
+	X2 in2 in4 vdd gnd not
+	M1 a   in1 gnd gnd nmos W={Wmin} L={Lmin} 
+	M2 a   in4 gnd gnd nmos W={Wmin} L={Lmin} 
+	M3 o2  in3 a   gnd nmos W={Wmin} L={Lmin}
+	M4 o2  in2 a   gnd nmos W={Wmin} L={Lmin}	
+	M5 o2  in1 b   vdd pmos W={Wmin} L={Lmin}
+	M6 o2  in2 b   vdd pmos W={Wmin} L={Lmin}
+	M7 b   in2 vdd vdd pmos W={Wmin} L={Lmin}
+	M8 b   in4 vdd vdd pmos W={Wmin} L={Lmin}
 .ends
 
-.subckt not a b 1 0
-	M1 b a 0 0 nmos W={Wmin} L={Lmin}  
-	M2 b a 1 1 pmos W={Wmin} L={Lmin}  
+.subckt not a b vdd gnd
+	M1 b a gnd gnd nmos W={Wmin} L={Lmin}  
+	M2 b a vdd vdd pmos W={Wmin} L={Lmin}  
 .ends
 	
 X1 ina inb out vdd gnd xor
@@ -42,8 +42,8 @@ X1 ina inb out vdd gnd xor
 		foreach VB 0 1.2
 			alter Vb = $VB
 				op
-				* print X1.a X1.b out
-				wrdata xor.txt X1.a X1.b out
+				print X1.a X1.b out
+				* wrdata xor.txt X1.a X1.b out
 		end
 	end
 

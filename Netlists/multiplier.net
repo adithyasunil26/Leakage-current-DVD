@@ -15,30 +15,30 @@ VA1 A1 0 0
 VB0 B0 0 0
 VB1 B1 1.2 0
 
-.subckt and in1 in2 o2 1 0
-	M1 a in2 0 0 nmos W={Wmin} L={Lmin} 
-	M2 o in1 a 0 nmos W={Wmin} L={Lmin} 
-	M3 o in1 1 1 pmos W={Wmin} L={Lmin} 
-	M4 o in2 1 1 pmos W={Wmin} L={Lmin} 
-	X1 o o2 1 0 not
+.subckt and in1 in2 o2 vdd gnd
+	M1 a in2 gnd gnd nmos W={Wmin} L={Lmin} 
+	M2 o in1 a   gnd nmos W={Wmin} L={Lmin} 
+	M3 o in1 vdd vdd pmos W={Wmin} L={Lmin} 
+	M4 o in2 vdd vdd pmos W={Wmin} L={Lmin} 
+	X1 o o2 vdd gnd not
 .ends
 
-.subckt xor in1 in2 o2 1 0
-	X1 in1 in3 1 0 not
-	X2 in2 in4 1 0 not
-	M1 a in1 0 0 nmos W={Wmin} L={Lmin} 
-	M2 a in4 0 0 nmos W={Wmin} L={Lmin} 
-	M3 o2 in3 a 0 nmos W={Wmin} L={Lmin}
-	M4 o2 in2 a 0 nmos W={Wmin} L={Lmin}	
-	M5 o2 in1 b 1 pmos W={Wmin} L={Lmin}
-	M6 o2 in2 b 1 pmos W={Wmin} L={Lmin}
-	M7 b in2 1 1 pmos W={Wmin} L={Lmin}
-	M8 b in4 1 1 pmos W={Wmin} L={Lmin}
+.subckt xor in1 in2 o2 vdd gnd
+	X1 in1 in3 vdd gnd not
+	X2 in2 in4 vdd gnd not
+	M1 a   in1 gnd gnd nmos W={Wmin} L={Lmin} 
+	M2 a   in4 gnd gnd nmos W={Wmin} L={Lmin} 
+	M3 o2  in3 a   gnd nmos W={Wmin} L={Lmin}
+	M4 o2  in2 a   gnd nmos W={Wmin} L={Lmin}	
+	M5 o2  in1 b   vdd pmos W={Wmin} L={Lmin}
+	M6 o2  in2 b   vdd pmos W={Wmin} L={Lmin}
+	M7 b   in2 vdd vdd pmos W={Wmin} L={Lmin}
+	M8 b   in4 vdd vdd pmos W={Wmin} L={Lmin}
 .ends
 
-.subckt not a b 1 0
-	M1 b a 0 0 nmos W={Wmin} L={Lmin}  
-	M2 b a 1 1 pmos W={Wmin} L={Lmin}  
+.subckt not a b vdd gnd
+	M1 b a gnd gnd nmos W={Wmin} L={Lmin}  
+	M2 b a vdd vdd pmos W={Wmin} L={Lmin}  
 .ends
 
 X1 A0   B0   s0   vdd gnd and

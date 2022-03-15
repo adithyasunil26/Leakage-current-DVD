@@ -9,16 +9,16 @@
 .PARAM Ldiff=90n
 
 Vdd vdd gnd 1.2v
-Va ina 0 1.2v
-Vb inb 0 0v
+Va 	ina 0 	1.2v
+Vb 	inb 0 	0v
 
-.subckt and in1 in2 o2 1 0
-M1 a in2 0 0 nmos W={Wmin} L={Lmin} 
-M2 o in1 a 0 nmos W={Wmin} L={Lmin} 
-M3 o in1 1 1 pmos W={Wmin} L={Lmin} 
-M4 o in2 1 1 pmos W={Wmin} L={Lmin} 
-M5 o2 o 0 0  nmos W={Wmin} L={Lmin} 
-M6 o2 o 1 1  pmos W={Wmin} L={Lmin} 
+.subckt and a b out2 vdd gnd
+M1 inter b 		gnd   gnd nmos W={Wmin} L={Lmin} 
+M2 out1  a 		inter gnd nmos W={Wmin} L={Lmin} 
+M3 out1  a 		vdd   vdd pmos W={Wmin} L={Lmin} 
+M4 out1  b 		vdd   vdd pmos W={Wmin} L={Lmin} 
+M5 out2  out1 gnd   gnd nmos W={Wmin} L={Lmin} 
+M6 out2  out1 vdd   vdd pmos W={Wmin} L={Lmin} 
 .ends
 
 X1 ina inb out vdd gnd and
@@ -33,8 +33,8 @@ X1 ina inb out vdd gnd and
 		foreach VB 0 1.2
 			alter Vb = $VB
 				op
-				* print X1.a out
-				wrdata and.txt X1.a out
+				print X1.inter out
+				* wrdata and.txt X1.inter out
 		end
 	end
 
