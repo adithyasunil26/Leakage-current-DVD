@@ -1,12 +1,11 @@
 #Model to calculate leakage current
 
-#Codes for understanding
+from tabulate import tabulate
+
+rounddig = 2
 
 ######################Defining matrix indices##############################
-
-rounding_digits = 2
-temp = 0      
-valim = 1    
+valim = 1
 vd = 2
 vg = 3
 vs = 4
@@ -40,7 +39,7 @@ def wToi(w):
 
 def IsubN(v, w):
     vr = v
-    vr = round(vr, rounding_digits)
+    vr = round(vr,  rounddig)
     vr = abs(vr)
     rowNo = vr/0.01 - 1
     rowNo = round(rowNo)
@@ -59,7 +58,7 @@ def IsubN(v, w):
 
 def IsubP(v, w):
     vr = v
-    vr = round(vr, rounding_digits)
+    vr = round(vr,  rounddig)
     vr = abs(vr)
     rowNo = vr/0.01 - 1
     rowNo = round(rowNo)
@@ -80,7 +79,7 @@ def IsubP(v, w):
 def IbodyVDSB(v, w):
 
     vr = v
-    vr = round(vr, rounding_digits)
+    vr = round(vr,  rounddig)
     vr = abs(vr)
     rowNo = vr/0.01 - 1
     rowNo = round(rowNo)
@@ -112,7 +111,7 @@ def IbodyVDSB(v, w):
 def IbodyVGB(v, w):
 
     vr = v
-    vr = round(vr, rounding_digits)
+    vr = round(vr,  rounddig)
     vr = abs(vr)
     rowNo = vr/0.01 - 1
     rowNo = round(rowNo)
@@ -144,7 +143,7 @@ def IbodyVGB(v, w):
 def IgateN(v, w):
 
     vr = v
-    vr = round(vr, rounding_digits)
+    vr = round(vr,  rounddig)
     vr = abs(vr)
     rowNo = vr/0.01 - 1
     rowNo = round(rowNo)
@@ -176,7 +175,7 @@ def IgateN(v, w):
 def IgateP(v, w):
 
     vr = v
-    vr = round(vr, rounding_digits)
+    vr = round(vr,  rounddig)
     vr = abs(vr)
     rowNo = vr/0.01 - 1
     rowNo = round(rowNo)
@@ -309,8 +308,8 @@ def MULTIPLIER(inputA1, inputA0, inputB1, inputB0, width, Vdd):
     S2 = C0 ^ I3
     S3 = C0 & I3
 
-    print("The inputs of Multiplier are in order as follows A1, A0, B1, B0:       ", inputA1, inputA0, inputB1, inputB0)
-    print("The outputs of Multiplier are in order as follows S3, S2, S1, S0:      ", S3, S2, S1, S0)
+    print("Inputs A1, A0, B1, B0:       ", inputA1, inputA0, inputB1, inputB0)
+    print("Outputs S3, S2, S1, S0:      ", S3, S2, S1, S0)
 
     I_sub = 0
     I_body = 0
@@ -405,10 +404,6 @@ PMOS_ON_8u = read_text(r'Part-1 files/PMOS_ON_8u.txt')
 ###############################################################################
 
 
-input_data = 2
-width = 2 #in µm
-Vdd = 1.2
-
 ########## AND GATE VOLTAGE ################
       #[1µm, 2µm, 3µm, 4µm, 6µm, 8µm]
 Va00 = [0.0863, 0.0864, 0.0864, 0.08641, 0.086426, 0.086449]
@@ -430,10 +425,21 @@ Vb11x = [1.199374, 1.199374, 1.199374, 1.199374, 1.199374, 1.199374]
 
 #################################################################################
 
+table = [['W','A0','A1','B0','B1','Leakage current','Subthreshold current','Body current','Gate current']]
+# table = table.append()
+for i in (1,2,3,4,6,8):
+    for j in (0,1):
+        for k in (0,1):
+            for l in (0,1):
+                for m in (0,1):
+                    TOTAL_LEAKAGE_CURRENT , I_sub , I_body , I_gate = MULTIPLIER(j, k, l, m, i, 1.2)
+                    print("Width = ", i, "µm")
+                    print("Total leakage current = ", round(TOTAL_LEAKAGE_CURRENT*1000000, 4), "µA") #A1, A0, B1, B0, width, Vdd
+                    print("Total subthreshold Leakage current = ", round(I_sub*1000000, 4), "µA") #A1, A0, B1, B0, width, Vdd
+                    print("Total body Leakage current = ", round(I_body*1000000, 4), "µA") #A1, A0, B1, B0, width, Vdd
+                    print("Total gate Leakage current = ", round(I_gate*1000000, 4), "µA") #A1, A0, B1, B0, width, Vdd
+                    table.append([i, j, k, l, m, round(TOTAL_LEAKAGE_CURRENT*1000000, 4), round(I_sub*1000000, 4), round(I_body*1000000, 4), round(I_gate*1000000, 4)])
 
-TOTAL_LEAKAGE_CURRENT , I_sub , I_body , I_gate = MULTIPLIER(0, 1, 0, 1, 1, 1.2)
 
-print("Total Leakage current in the circuit =", round(TOTAL_LEAKAGE_CURRENT*1000000, 4), "µA") #A1, A0, B1, B0, width, Vdd
-print("Total subthreshold Leakage current in the circuit =", round(I_sub*1000000, 4), "µA") #A1, A0, B1, B0, width, Vdd
-print("Total body Leakage current in the circuit =", round(I_body*1000000, 4), "µA") #A1, A0, B1, B0, width, Vdd
-print("Total gate Leakage current in the circuit =", round(I_gate*1000000, 4), "µA") #A1, A0, B1, B0, width, Vdd
+print(tabulate(table, headers='firstrow', tablefmt='grid'))                
+
