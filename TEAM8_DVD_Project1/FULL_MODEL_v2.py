@@ -1,6 +1,9 @@
 #Model to calculate leakage current
 
 #Codes for understanding
+
+######################Defining matrix indices##############################
+
 rounding_digits = 2
 temp = 0      
 valim = 1    
@@ -11,7 +14,13 @@ vb = 5
 Id = 6
 Ig = 7
 Is = 8
-Ib = 9        
+Ib = 9
+
+############################################################################
+
+
+
+######################Defining functions required #############################
 
 def read_text(path):
     arr = [[item for item in line.split()] for line in open(path)]
@@ -195,7 +204,174 @@ def IgateP(v, w):
         return l.get(w)
     else:
         return 0
+
+
+def AND(inputA, inputB, width, Vdd):
+    total_leakage_power = 0
+
+    if((inputA==0) and (inputB==0)):
+
+        I_sub = abs(IsubN(Va00[wToi(width)], width)) + abs(IsubP(-Vdd, width))
+        
+        I_body = 2*abs(IbodyVDSB(Va00[wToi(width)], width)) + abs(IbodyVDSB(Vdd, width)) + 2*abs(IbodyVGB(-Vdd, width)) + abs(IbodyVGB(Vdd, width)) + abs(IbodyVDSB(-Vdd, width))
+        
+        I_gate = 4*abs(IgateP(Vdd, width)) + 2*abs(IgateN(Va00[wToi(width)], width)) + abs(IgateN(Vdd, width)) + 2*abs(IgateN(-Vdd, width)) + abs(IgateP(-Vdd, width))
+        
+        total_leakage_power = I_sub + I_body + I_gate 
     
+    elif((inputA==0) and (inputB==1)):
+        
+        I_sub = IsubN(Va01[wToi(width)], width) + IsubP(-Vdd, width)
+        
+        I_body = 2*abs(IbodyVDSB(Va01[wToi(width)], width)) + abs(IbodyVDSB(Vdd, width)) + abs(IbodyVGB(-Vdd, width)) + abs(IbodyVGB(Vdd, width)) + abs(IbodyVDSB(Vdd, width))
+        
+        I_gate = 2*abs(IgateP(Vdd, width)) + abs(IgateN(Va01[wToi(width)], width)) + 2*abs(IgateN(-Vdd, width)) + abs(IgateP(-Vdd, width))
+        
+        total_leakage_power = I_sub + I_body + I_gate
+
+    elif((inputA==1) and (inputB==0)):
+        
+        I_sub = IsubN(Vdd - Va10[wToi(width)], width) + IsubP(-Vdd, width)
+        
+        I_body = 2*abs(IbodyVDSB(Va10[wToi(width)], width)) + abs(IbodyVDSB(Vdd, width)) + abs(IbodyVGB(Vdd, width)) + abs(IbodyVGB(-Vdd, width)) + abs(IbodyVGB(Vdd, width)) + abs(IbodyVDSB(-Vdd, width))
+        
+        I_gate = 2*abs(IgateP(Vdd, width)) + abs(IgateN(Vdd, width)) + abs(IgateN(Va10[wToi(width)], width)) + 2*abs(IgateN(-Vdd, width)) + 2*abs(IgateN(-Vdd, width)) + abs(IgateP(-Vdd, width))
+        
+        total_leakage_power = I_sub + I_body + I_gate
+    
+    else:
+        
+        I_sub = 2*IsubP(-Vdd, width) + IsubN(Vdd, width)
+        
+        I_body = 2*abs(IbodyVGB(Vdd, width)) + 2*abs(IbodyVDSB(-Vdd, width)) + abs(IbodyVDSB(Vdd, width)) + abs(IbodyVGB(Vdd, width))
+        
+        I_gate = 2*abs(IgateP(-Vdd, width)) + 4*abs(IgateN(-Vdd, width)) + 2*abs(IgateP(Vdd, width)) + abs(IgateN(Vdd, width))
+        
+        total_leakage_power = I_sub + I_body + I_gate
+    
+    return total_leakage_power , I_sub  ,I_body , I_gate
+
+
+def XOR(inputA, inputB, width, Vdd):
+    total_leakage_power = 0
+
+    if((inputA==0) and (inputB==0)):
+
+        I_sub = 2*abs(IsubP(Vb00x[wToi(width)] - Vdd, width))
+        
+        I_body = 2*abs(IbodyVGB(Vdd, width)) + 2*abs(IbodyVDSB(-Vdd, width)) + 4*abs(IbodyVDSB(Vb00x[wToi(width)] - Vdd, width)) + 2*abs(IbodyVGB(-Vdd, width))
+        
+        I_gate = 4*abs(IgateN(-Vdd, width)) + 2*abs(IgateP(Vb00x[wToi(width)], width)) + 2*abs(IgateP(Vb00x[wToi(width)] - Vdd, width))
+        
+        total_leakage_power = I_sub + I_body + I_gate
+    
+    elif((inputA==0) and (inputB==1)):
+        
+        I_sub = 2*abs(IsubN(Va01x[wToi(width)], width))
+        
+        I_body = 4*abs(IbodyVDSB(Va01x[wToi(width)], width)) + 2*abs(IbodyVDSB(Vdd, width)) + 2*abs(IbodyVGB(Vdd - Va01x[wToi(width)], width)) + 2*abs(IbodyVGB(-Vdd, width))
+        
+        I_gate = 2*abs(IgateN(Va01x[wToi(width)], width)) + 2*abs(IgateN(Va01x[wToi(width)] - Vdd, width)) + 6*abs(IgateP(Vdd, width))
+        
+        total_leakage_power = I_sub + I_body + I_gate
+
+    elif((inputA==1) and (inputB==0)):
+
+        I_sub = 2*abs(IsubN(Vdd - Va10x[wToi(width)], width))
+        
+        I_body = 4*abs(IbodyVDSB(Va10x[wToi(width)], width)) + 2*abs(IbodyVDSB(Vdd, width)) + 2*abs(IbodyVGB(Vdd, width)) + 2*abs(IbodyVGB(-Vdd, width))
+        
+        I_gate = 2*abs(IgateN(-Vdd, width)) + 2*abs(IgateN(Va10x[wToi(width)] - Vdd, width)) + 2*abs(IgateN(Va10x[wToi(width)], width)) + 2*abs(IgateN(Vdd, width)) + 4*abs(IgateP(Vdd, width))
+        
+        total_leakage_power = I_sub + I_body + I_gate
+
+    else:
+        
+        I_sub = 2*abs(IsubP(-Vb11x[wToi(width)], width))
+        
+        I_body = 2*abs(IbodyVDSB(-Vdd, width)) + 4*abs(IbodyVDSB(Vb11x[wToi(width)] - Vdd, width)) + 2*abs(IbodyVGB(Vdd, width)) + 2*abs(IbodyVGB(-Vdd, width))
+        
+        I_gate = 4*abs(IgateN(-Vdd, width)) + 2*abs(IgateP(-Vdd, width)) + 2*abs(IgateP(Vb11x[wToi(width)]-Vdd, width)) + 2*abs(IgateP(Vdd, width))
+        
+        total_leakage_power = I_sub + I_body + I_gate
+
+    return total_leakage_power, I_sub, I_body, I_gate
+
+
+def MULTIPLIER(inputA1, inputA0, inputB1, inputB0, width, Vdd):
+
+    S0 = inputA0 & inputB0
+    I1 = inputA1 & inputB0
+    I2 = inputA0 & inputB1
+    I3 = inputA1 & inputB1
+    C0 = I1 & I2
+    S1 = I1 ^ I2
+    S2 = C0 ^ I3
+    S3 = C0 & I3
+
+    print("The inputs of Multiplier are in order as follows A1, A0, B1, B0:       ", inputA1, inputA0, inputB1, inputB0)
+    print("The outputs of Multiplier are in order as follows S3, S2, S1, S0:      ", S3, S2, S1, S0)
+
+    I_sub = 0
+    I_body = 0
+    I_gate = 0
+    total_leak = 0
+    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(inputA0, inputB0, width, Vdd) #X1-AND GATE
+
+    I_sub += I_sub_k
+    I_body += I_body_k
+    I_gate += I_gate_k
+    total_leak += total_leak_k
+    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(inputA0, inputB1 , width, Vdd) #X2-AND GATE
+
+    I_sub += I_sub_k
+    I_body += I_body_k
+    I_gate += I_gate_k
+    total_leak += total_leak_k
+    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(inputA1, inputB0 , width, Vdd) #X3-AND GATE
+
+    I_sub += I_sub_k
+    I_body += I_body_k
+    I_gate += I_gate_k
+    total_leak += total_leak_k
+    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(inputA1, inputB1, width, Vdd) #X4-AND GATE
+
+    I_sub += I_sub_k
+    I_body += I_body_k
+    I_gate += I_gate_k
+    total_leak += total_leak_k
+    total_leak_k, I_sub_k, I_body_k, I_gate_k =  XOR(I1, I2, width, Vdd) #X5-XOR GATE
+
+    I_sub += I_sub_k
+    I_body += I_body_k
+    I_gate += I_gate_k
+    total_leak += total_leak_k
+    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(I1, I2, width, Vdd) #X6-AND GATE
+
+    I_sub += I_sub_k
+    I_body += I_body_k
+    I_gate += I_gate_k
+    total_leak += total_leak_k
+    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(C0, inputA1&inputB1, width, Vdd) #X7-AND GATE
+
+    I_sub += I_sub_k
+    I_body += I_body_k
+    I_gate += I_gate_k
+    total_leak += total_leak_k
+    total_leak_k, I_sub_k, I_body_k, I_gate_k =  XOR(C0, inputA1&inputB1, width, Vdd) #X8-XOR GATE
+    
+    I_sub += I_sub_k
+    I_body += I_body_k
+    I_gate += I_gate_k
+    total_leak += total_leak_k
+
+    return total_leak, I_sub, I_body, I_gate
+
+
+#####################################################################################################
+
+
+############################Importing data from text files##################
 
 NMOS_OFF_1u = read_text(r'Part-1 files/NMOS_OFF_1u.txt')
 NMOS_OFF_2u = read_text(r'Part-1 files/NMOS_OFF_2u.txt')
@@ -226,6 +402,9 @@ PMOS_ON_6u = read_text(r'Part-1 files/PMOS_ON_6u.txt')
 PMOS_ON_8u = read_text(r'Part-1 files/PMOS_ON_8u.txt')
 
 
+###############################################################################
+
+
 input_data = 2
 width = 2 #in µm
 Vdd = 1.2
@@ -249,126 +428,10 @@ Vb01x = [1.198743, 1.198743, 1.199214, 1.199214, 1.199214, 1.199214]
 Vb10x = [1.198215, 1.1989, 1.1989, 1.1989, 1.1989, 1.1989]
 Vb11x = [1.199374, 1.199374, 1.199374, 1.199374, 1.199374, 1.199374]
 
-def AND(inputA, inputB, width, Vdd):
-    total_leakage_power = 0
-    I_sub = 0
-    I_gate = 0
-    I_body = 0
-    if((inputA==0) and (inputB==0)):
-        I_sub += abs(IsubN(Va00[wToi(width)], width)) + abs(IsubP(-Vdd, width))
-        I_body += 2*abs(IbodyVDSB(Va00[wToi(width)], width)) + abs(IbodyVDSB(Vdd, width)) + 2*abs(IbodyVGB(-Vdd, width)) + abs(IbodyVGB(Vdd, width)) + abs(IbodyVDSB(-Vdd, width))
-        I_gate += 4*abs(IgateP(Vdd, width)) + 2*abs(IgateN(Va00[wToi(width)], width)) + abs(IgateN(Vdd, width)) + 2*abs(IgateN(-Vdd, width)) + abs(IgateP(-Vdd, width))
-        total_leakage_power = I_sub + I_body + I_gate 
-    elif((inputA==0) and (inputB==1)):
-        I_sub += IsubN(Va01[wToi(width)], width) + IsubP(-Vdd, width)
-        I_body += 2*abs(IbodyVDSB(Va01[wToi(width)], width)) + abs(IbodyVDSB(Vdd, width)) + abs(IbodyVGB(-Vdd, width)) + abs(IbodyVGB(Vdd, width)) + abs(IbodyVDSB(Vdd, width))
-        I_gate += 2*abs(IgateP(Vdd, width)) + abs(IgateN(Va01[wToi(width)], width)) + 2*abs(IgateN(-Vdd, width)) + abs(IgateP(-Vdd, width))
-        total_leakage_power = I_sub + I_body + I_gate
-    elif((inputA==1) and (inputB==0)):
-        I_sub += IsubN(Vdd - Va10[wToi(width)], width) + IsubP(-Vdd, width)
-        I_body += 2*abs(IbodyVDSB(Va10[wToi(width)], width)) + abs(IbodyVDSB(Vdd, width)) + abs(IbodyVGB(Vdd, width)) + abs(IbodyVGB(-Vdd, width)) + abs(IbodyVGB(Vdd, width)) + abs(IbodyVDSB(-Vdd, width))
-        I_gate += 2*abs(IgateP(Vdd, width)) + abs(IgateN(Vdd, width)) + abs(IgateN(Va10[wToi(width)], width)) + 2*abs(IgateN(-Vdd, width)) + 2*abs(IgateN(-Vdd, width)) + abs(IgateP(-Vdd, width))
-        total_leakage_power = I_sub + I_body + I_gate
-    else:
-        I_sub += 2*IsubP(-Vdd, width) + IsubN(Vdd, width)
-        I_body += 2*abs(IbodyVGB(Vdd, width)) + 2*abs(IbodyVDSB(-Vdd, width)) + abs(IbodyVDSB(Vdd, width)) + abs(IbodyVGB(Vdd, width))
-        I_gate += 2*abs(IgateP(-Vdd, width)) + 4*abs(IgateN(-Vdd, width)) + 2*abs(IgateP(Vdd, width)) + abs(IgateN(Vdd, width))
-        total_leakage_power = I_sub + I_body + I_gate
-    return total_leakage_power , I_sub  ,I_body , I_gate
+#################################################################################
 
 
-def XOR(inputA, inputB, width, Vdd):
-    total_leakage_power = 0
-    I_sub = 0
-    I_gate = 0
-    I_body = 0
-    if((inputA==0) and (inputB==0)):
-        I_sub += 2*abs(IsubP(Vb00x[wToi(width)] - Vdd, width))
-        I_body += 2*abs(IbodyVGB(Vdd, width)) + 2*abs(IbodyVDSB(-Vdd, width)) + 4*abs(IbodyVDSB(Vb00x[wToi(width)] - Vdd, width)) + 2*abs(IbodyVGB(-Vdd, width))
-        I_gate += 4*abs(IgateN(-Vdd, width)) + 2*abs(IgateP(Vb00x[wToi(width)], width)) + 2*abs(IgateP(Vb00x[wToi(width)] - Vdd, width))
-        total_leakage_power = I_sub + I_body + I_gate
-    elif((inputA==0) and (inputB==1)):
-        I_sub += 2*abs(IsubN(Va01x[wToi(width)], width))
-        I_body += 4*abs(IbodyVDSB(Va01x[wToi(width)], width)) + 2*abs(IbodyVDSB(Vdd, width)) + 2*abs(IbodyVGB(Vdd - Va01x[wToi(width)], width)) + 2*abs(IbodyVGB(-Vdd, width))
-        I_gate += 2*abs(IgateN(Va01x[wToi(width)], width)) + 2*abs(IgateN(Va01x[wToi(width)] - Vdd, width)) + 6*abs(IgateP(Vdd, width))
-        total_leakage_power = I_sub + I_body + I_gate
-    elif((inputA==1) and (inputB==0)):
-        I_sub += 2*abs(IsubN(Vdd - Va10x[wToi(width)], width))
-        I_body += 4*abs(IbodyVDSB(Va10x[wToi(width)], width)) + 2*abs(IbodyVDSB(Vdd, width)) + 2*abs(IbodyVGB(Vdd, width)) + 2*abs(IbodyVGB(-Vdd, width))
-        I_gate += 2*abs(IgateN(-Vdd, width)) + 2*abs(IgateN(Va10x[wToi(width)] - Vdd, width)) + 2*abs(IgateN(Va10x[wToi(width)], width)) + 2*abs(IgateN(Vdd, width)) + 4*abs(IgateP(Vdd, width))
-        total_leakage_power = I_sub + I_body + I_gate
-    else:
-        I_sub += 2*abs(IsubP(-Vb11x[wToi(width)], width))
-        I_body += 2*abs(IbodyVDSB(-Vdd, width)) + 4*abs(IbodyVDSB(Vb11x[wToi(width)] - Vdd, width)) + 2*abs(IbodyVGB(Vdd, width)) + 2*abs(IbodyVGB(-Vdd, width))
-        I_gate += 4*abs(IgateN(-Vdd, width)) + 2*abs(IgateP(-Vdd, width)) + 2*abs(IgateP(Vb11x[wToi(width)]-Vdd, width)) + 2*abs(IgateP(Vdd, width))
-        total_leakage_power = I_sub + I_body + I_gate
-    return total_leakage_power, I_sub, I_body, I_gate
-
-def MULTIPLIER(inputA1, inputA0, inputB1, inputB0, width, Vdd):
-
-    S0 = inputA0 & inputB0
-    I1 = inputA1 & inputB0
-    I2 = inputA0 & inputB1
-    I3 = inputA1 & inputB1
-    C0 = I1 & I2
-    S1 = I1 ^ I2
-    S2 = C0 ^ I3
-    S3 = C0 & I3
-
-    print("The inputs of Multiplier are in order as follows A1, A0, B1, B0:       ", inputA1, inputA0, inputB1, inputB0)
-    print("The outputs of Multiplier are in order as follows S3, S2, S1, S0:      ", S3, S2, S1, S0)
-
-    I_sub = 0
-    I_body = 0
-    I_gate = 0
-    total_leak = 0
-    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(inputA0, inputB0, width, Vdd) #X1-AND GATE
-    I_sub += I_sub_k
-    I_body += I_body_k
-    I_gate += I_gate_k
-    total_leak += total_leak_k
-    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(inputA0, inputB1 , width, Vdd) #X2-AND GATE
-    I_sub += I_sub_k
-    I_body += I_body_k
-    I_gate += I_gate_k
-    total_leak += total_leak_k
-    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(inputA1, inputB0 , width, Vdd) #X3-AND GATE
-    I_sub += I_sub_k
-    I_body += I_body_k
-    I_gate += I_gate_k
-    total_leak += total_leak_k
-    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(inputA1, inputB1, width, Vdd) #X4-AND GATE
-    I_sub += I_sub_k
-    I_body += I_body_k
-    I_gate += I_gate_k
-    total_leak += total_leak_k
-    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(I1, I2, width, Vdd) #X6-AND GATE
-    I_sub += I_sub_k
-    I_body += I_body_k
-    I_gate += I_gate_k
-    total_leak += total_leak_k
-    total_leak_k, I_sub_k, I_body_k, I_gate_k =  AND(C0, inputA1&inputB1, width, Vdd) #X7-AND GATE
-    I_sub += I_sub_k
-    I_body += I_body_k
-    I_gate += I_gate_k
-    total_leak += total_leak_k
-    total_leak_k, I_sub_k, I_body_k, I_gate_k =  XOR(I1, I2, width, Vdd) #X5-XOR GATE
-    I_sub += I_sub_k
-    I_body += I_body_k
-    I_gate += I_gate_k
-    total_leak += total_leak_k
-    total_leak_k, I_sub_k, I_body_k, I_gate_k =  XOR(C0, inputA1&inputB1, width, Vdd) #X8-XOR GATE
-    I_sub += I_sub_k
-    I_body += I_body_k
-    I_gate += I_gate_k
-    total_leak += total_leak_k
-
-    return total_leak, I_sub, I_body, I_gate
-
-#rint(AND(0, 1, 3, 1.2))
-#print(XOR(input_data, width, Vdd))
-
-TOTAL_LEAKAGE_CURRENT , I_sub , I_body , I_gate = MULTIPLIER(0, 1, 0, 1, 6, 1.2)
+TOTAL_LEAKAGE_CURRENT , I_sub , I_body , I_gate = MULTIPLIER(0, 1, 0, 1, 1, 1.2)
 
 print("Total Leakage current in the circuit =", round(TOTAL_LEAKAGE_CURRENT*1000000, 4), "µA") #A1, A0, B1, B0, width, Vdd
 print("Total subthreshold Leakage current in the circuit =", round(I_sub*1000000, 4), "µA") #A1, A0, B1, B0, width, Vdd

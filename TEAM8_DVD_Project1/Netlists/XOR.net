@@ -1,13 +1,13 @@
 *TRYING XOR GATE & SUBCIRCUIT
 *WORKING
          
-.INCLUDE C:\Users\Arpit\Documents\NGSpice\DVD\Project-1\45nm_MGK.pm
+.INCLUDE 45nm_MGK.pm
 *********************************
 .OPTIONS GMIN=1e-020 ABSTOL=1e-18
 
 *Parameter definition
 .PARAM Lmin=45n
-.PARAM Wmin=4u
+.PARAM Wmin=1u
 .PARAM Ldiff=90n
 	
 X1 ina inb out vdd gnd xor
@@ -38,30 +38,21 @@ Vb inb 0 0v
 .op
 
 .CONTROL
-	alter Va = 0
-	alter Vb = 0
-	op
-	print X1.a X1.b 
-	print out
+	set wr_vecnames
+	set wr_singlescale
+	set appendwrite
 
-	alter Va = 0
-	alter Vb = 1.2
-	op
-	print X1.a X1.b 
-	print out
+	foreach VA 0 1.2
+		alter Va = $VA
+		foreach VB 0 1.2
+			alter Vb = $VB
+				op
+				print X1.a X1.b out
+				wrdata xor.txt X1.a X1.b out
+		end
+	end
 
-	alter Va = 1.2
-	alter Vb = 0
-	op
-	print X1.a X1.b 
-	print out
-
-	alter Va = 1.2
-	alter Vb = 1.2
-	op
-	print X1.a X1.b 
-	print out
-run
+	run
 
 .ENDC
 .END

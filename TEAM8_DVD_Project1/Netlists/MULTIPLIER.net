@@ -1,7 +1,7 @@
 *TRYING FULL MULTIPLIER USING 3 SUB-CKTS
 *WORKING
          
-.INCLUDE C:\Users\Arpit\Documents\NGSpice\DVD\Project-1\45nm_MGK.pm
+.INCLUDE 45nm_MGK.pm
 *********************************
 .OPTIONS GMIN=1e-020 ABSTOL=1e-18
 
@@ -23,10 +23,10 @@ X6 out2 out3 c0   vdd gnd and
 X7 c0   out4 cout vdd gnd and
 X8 c0   out4 s2   vdd gnd xor
 
-VA0 A0 0 0
+VA0 A0 1.2 0
 VA1 A1 0 0
 VB0 B0 0 0
-VB1 B1 0 0
+VB1 B1 1.2 0
 
 
 ************SUB-CKTS******************
@@ -60,9 +60,11 @@ VB1 B1 0 0
 *Definition of type	 of analysis
 
 .CONTROL
-op
-print s0 s1 s2
-print Vdd#branch VB0#branch VB1#branch VA1#branch VA0#branch
+* op
+tran 1ps 10ps 0.1ps
+hardcopy makichut.eps A0 A1+2 B0+4 B1+6 s0+8 s1+10 s2+12
+print Vdd#branch 
+* VB0#branch VB1#branch VA1#branch VA0#branch
 run
 
 .ENDC
