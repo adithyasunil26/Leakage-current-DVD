@@ -1,0 +1,71 @@
+*TRYING FULL MULTIPLIER USING 3 SUB-CKTS
+*WORKING
+         
+.INCLUDE 45nm_MGK.pm
+*********************************
+.OPTIONS GMIN=1e-020 ABSTOL=1e-18
+
+*Parameter definition
+.PARAM Lmin=45n
+.PARAM Wmin=1u
+.PARAM Ldiff=90n
+	
+Vdd vdd gnd 1.2v	
+	
+*Description of the MOS
+
+X1 A0   B0   s0   vdd gnd and
+X2 A1   B0   out2 vdd gnd and
+X3 A0   B1   out3 vdd gnd and
+X4 A1   B1   out4 vdd gnd and
+X5 out2 out3 s1   vdd gnd xor
+X6 out2 out3 c0   vdd gnd and
+X7 c0   out4 cout vdd gnd and
+X8 c0   out4 s2   vdd gnd xor
+
+VA0 A0 1.2 0
+VA1 A1 0 0
+VB0 B0 0 0
+VB1 B1 1.2 0
+
+
+************SUB-CKTS******************
+
+.subckt and in1 in2 o2 1 0
+	M1 a in2 0 0 nmos W={Wmin} L={Lmin} 
+	M2 o in1 a 0 nmos W={Wmin} L={Lmin} 
+	M3 o in1 1 1 pmos W={Wmin} L={Lmin} 
+	M4 o in2 1 1 pmos W={Wmin} L={Lmin} 
+	X1 o o2 1 0 not
+.ends
+
+.subckt xor in1 in2 o2 1 0
+	X1 in1 in3 1 0 not
+	X2 in2 in4 1 0 not
+	M1 a in1 0 0 nmos W={Wmin} L={Lmin} 
+	M2 a in4 0 0 nmos W={Wmin} L={Lmin} 
+	M3 o2 in3 a 0 nmos W={Wmin} L={Lmin}
+	M4 o2 in2 a 0 nmos W={Wmin} L={Lmin}	
+	M5 o2 in1 b 1 pmos W={Wmin} L={Lmin}
+	M6 o2 in2 b 1 pmos W={Wmin} L={Lmin}
+	M7 b in2 1 1 pmos W={Wmin} L={Lmin}
+	M8 b in4 1 1 pmos W={Wmin} L={Lmin}
+.ends
+
+.subckt not a b 1 0
+	M1 b a 0 0 nmos W={Wmin} L={Lmin}  
+	M2 b a 1 1 pmos W={Wmin} L={Lmin}  
+.ends
+
+*Definition of type	 of analysis
+
+.CONTROL
+* op
+tran 1ps 10ps 0.1ps
+hardcopy makichut.eps A0 A1+2 B0+4 B1+6 s0+8 s1+10 s2+12
+print Vdd#branch 
+* VB0#branch VB1#branch VA1#branch VA0#branch
+run
+
+.ENDC
+.END

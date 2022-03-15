@@ -1,0 +1,58 @@
+*TRYING XOR GATE & SUBCIRCUIT
+*WORKING
+         
+.INCLUDE 45nm_MGK.pm
+*********************************
+.OPTIONS GMIN=1e-020 ABSTOL=1e-18
+
+*Parameter definition
+.PARAM Lmin=45n
+.PARAM Wmin=1u
+.PARAM Ldiff=90n
+	
+X1 ina inb out vdd gnd xor
+
+Vdd vdd gnd 1.2v	
+Va ina 0 1.2v
+Vb inb 0 0v
+
+.subckt xor in1 in2 o2 1 0
+	X1 in1 in3 1 0 not
+	X2 in2 in4 1 0 not
+	M1 a in1 0 0 nmos W={Wmin} L={Lmin} 
+	M2 a in4 0 0 nmos W={Wmin} L={Lmin} 
+	M3 o2 in3 a 0 nmos W={Wmin} L={Lmin}
+	M4 o2 in2 a 0 nmos W={Wmin} L={Lmin}	
+	M5 o2 in1 b 1 pmos W={Wmin} L={Lmin}
+	M6 o2 in2 b 1 pmos W={Wmin} L={Lmin}
+	M7 b in2 1 1 pmos W={Wmin} L={Lmin}
+	M8 b in4 1 1 pmos W={Wmin} L={Lmin}
+.ends
+
+.subckt not a b 1 0
+	M1 b a 0 0 nmos W={Wmin} L={Lmin}  
+	M2 b a 1 1 pmos W={Wmin} L={Lmin}  
+.ends
+
+*Definition of type	 of analysis
+.op
+
+.CONTROL
+	set wr_vecnames
+	set wr_singlescale
+	set appendwrite
+
+	foreach VA 0 1.2
+		alter Va = $VA
+		foreach VB 0 1.2
+			alter Vb = $VB
+				op
+				print X1.a X1.b out
+				wrdata xor.txt X1.a X1.b out
+		end
+	end
+
+	run
+
+.ENDC
+.END
